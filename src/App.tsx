@@ -1,14 +1,13 @@
+import * as packageJson from '../package.json';
 import './App.css';
 import { Counter } from './features/counter/Counter';
 import logo from './logo.svg';
 
-const VERSION = 2;
-
 function App() {
-  console.log(`Version: V${VERSION}`);
+  console.log(`Version: V${packageJson.version}`);
   return (
     <div className="App">
-      <h3>Version {VERSION}</h3>
+      <h3>Version {packageJson.version}</h3>
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <Counter />
