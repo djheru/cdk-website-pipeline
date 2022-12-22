@@ -1,4 +1,4 @@
-import * as packageJson from '../package.json';
+import packageJson from '../package.json';
 import './App.css';
 import { Counter } from './features/counter/Counter';
 import logo from './logo.svg';
