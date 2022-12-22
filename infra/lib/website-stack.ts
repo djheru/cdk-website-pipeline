@@ -239,6 +239,9 @@ export class WebsiteStack extends Stack {
     });
   }
 
+  /**
+   * Build CI/CD pipeline to listen for changes in GitHub and automatically deploy
+   */
   buildPipeline() {
     const pipelineId = `${this.id}-cicd`;
     this.pipeline = new WebsitePipeline(this, pipelineId, {

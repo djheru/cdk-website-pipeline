@@ -6,9 +6,11 @@ import {
   CloudFrontRequestResult,
   Context,
 } from 'aws-lambda';
+import * as qs from 'querystring';
 
 export const BLUE_GREEN_RATIO = 0.8;
 export const blueGreenHeaderContextKey = 'x-blue-green-context';
+export const blueGreenQueryStringParam = `blue_green`;
 
 /**
  * This function ensures that the x-blue-green-context header is set for the next
@@ -31,13 +33,21 @@ export const handler: CloudFrontRequestHandler = (
 
   const request: CloudFrontRequest = event.Records[0].cf.request;
   const headers = request.headers;
+  const querystringParams = qs.parse(`${request.querystring}`);
 
   let blueGreenContext: 'blue' | 'green' = 'blue';
   const contextHeader = headers[blueGreenHeaderContextKey];
+  const contextQueryStringParam = querystringParams[blueGreenQueryStringParam];
 
   if (contextHeader) {
     blueGreenContext = contextHeader[0].value === 'blue' ? 'blue' : 'green';
     console.log('Existing header: %j', blueGreenContext);
+  } else if (contextQueryStringParam) {
+    blueGreenContext = contextQueryStringParam === 'blue' ? 'blue' : 'green';
+    console.log('Existing query string: %j', blueGreenContext);
+    // Update querystring for origin request
+    delete querystringParams[blueGreenQueryStringParam];
+    request.querystring = qs.stringify(querystringParams);
   } else {
     blueGreenContext = Math.random() < BLUE_GREEN_RATIO ? 'blue' : 'green';
     console.log('Randomly chosen header: %j', blueGreenContext);
