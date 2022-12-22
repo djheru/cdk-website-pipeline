@@ -12,6 +12,25 @@ export const BLUE_GREEN_RATIO = 0.8;
 export const blueGreenHeaderContextKey = 'x-blue-green-context';
 export const blueGreenQueryStringParam = `blue_green`;
 
+const setCookieResponse = (location: string, blueGreenContext: string) => ({
+  status: '302',
+  statusDescription: 'Found',
+  headers: {
+    location: [
+      {
+        key: 'location',
+        value: location,
+      },
+    ],
+    'set-cookie': [
+      {
+        key: 'set-cookie',
+        value: `${blueGreenHeaderContextKey}=${blueGreenContext}; Secure; HttpOnly`,
+      },
+    ],
+  },
+});
+
 /**
  * This function ensures that the x-blue-green-context header is set for the next
  * leg of the CloudFront journey, which is "Origin Request". This leg, known as
@@ -37,6 +56,9 @@ export const handler: CloudFrontRequestHandler = (
 
   let blueGreenContext: 'blue' | 'green' = 'blue';
   const contextHeader = headers[blueGreenHeaderContextKey];
+  const contextCookie = (headers.cookie || []).find((cookie) =>
+    cookie.value.includes(blueGreenHeaderContextKey)
+  );
   const contextQueryStringParam = querystringParams[blueGreenQueryStringParam];
 
   if (contextHeader) {
@@ -48,9 +70,18 @@ export const handler: CloudFrontRequestHandler = (
     // Update querystring for origin request
     delete querystringParams[blueGreenQueryStringParam];
     request.querystring = qs.stringify(querystringParams);
+  } else if (contextCookie) {
+    blueGreenContext = contextCookie.value.includes(`${blueGreenHeaderContextKey}=blue`)
+      ? 'blue'
+      : 'green';
+    console.log('Existing cookie: %j', blueGreenContext);
   } else {
     blueGreenContext = Math.random() < BLUE_GREEN_RATIO ? 'blue' : 'green';
     console.log('Randomly chosen header: %j', blueGreenContext);
+    // redirect and set cookie
+    const redirectResponse = setCookieResponse(request.uri, blueGreenContext);
+    console.log('Set-cookie redirect: %j', redirectResponse);
+    return callback(null, redirectResponse);
   }
 
   headers[blueGreenHeaderContextKey] = [
@@ -61,5 +92,5 @@ export const handler: CloudFrontRequestHandler = (
   ];
 
   console.log('response: %j', request);
-  callback(null, { ...request, headers: { ...request.headers, ...headers } });
+  return callback(null, { ...request, headers: { ...request.headers, ...headers } });
 };
