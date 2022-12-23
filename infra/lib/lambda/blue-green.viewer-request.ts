@@ -9,8 +9,8 @@ import {
 } from 'aws-lambda';
 import * as qs from 'querystring';
 
-type RequestBlueGreenContext = 'blue' | 'green' | null;
-type BlueGreenContext = 'blue' | 'green' | null;
+type BlueGreenContext = 'blue' | 'green';
+type RequestBlueGreenContext = BlueGreenContext | null;
 
 export const BLUE_GREEN_RATIO = 0.8;
 export const blueGreenHeaderContextKey = 'x-blue-green-context';

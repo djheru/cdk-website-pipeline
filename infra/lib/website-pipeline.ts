@@ -166,9 +166,11 @@ export class WebsitePipeline extends Construct {
 
     const approvalAction = new ManualApprovalAction({
       actionName: 'ApproveGreenAction',
-      additionalInformation: `Approve the Deployment to S3 for the GREEN deployment group? 
+      additionalInformation: `
+Approve the Deployment to S3 for the GREEN deployment group? 
       
-        Add request header "x-blue-green-context" with value of "green" to test the new deployment.`,
+Add request header "x-blue-green-context" with value of "green", or a query string of "?blue_green=green" to test the new deployment.
+`,
       externalEntityLink: `https://github.com/${githubOwner}/${githubRepo}/tree/${githubBranchName}`,
       runOrder: 3,
     });
