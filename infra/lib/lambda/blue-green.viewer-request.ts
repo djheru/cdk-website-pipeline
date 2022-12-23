@@ -13,24 +13,28 @@ export const BLUE_GREEN_RATIO = 0.8;
 export const blueGreenHeaderContextKey = 'x-blue-green-context';
 export const blueGreenQueryStringParam = `blue_green`;
 
-const setCookieRequest = (location: string, blueGreenContext: string) => ({
-  status: '302',
-  statusDescription: 'Found',
-  headers: {
-    location: [
-      {
-        key: 'location',
-        value: location,
-      },
-    ],
-    'set-cookie': [
-      {
-        key: 'set-cookie',
-        value: `${blueGreenHeaderContextKey}=${blueGreenContext}; Secure; HttpOnly`,
-      },
-    ],
-  },
-});
+const setCookieRequest = (location: string, blueGreenContext: string) => {
+  const cookieRequest = {
+    status: '302',
+    statusDescription: 'Found',
+    headers: {
+      location: [
+        {
+          key: 'location',
+          value: location,
+        },
+      ],
+      'set-cookie': [
+        {
+          key: 'set-cookie',
+          value: `${blueGreenHeaderContextKey}=${blueGreenContext}; Secure; HttpOnly`,
+        },
+      ],
+    },
+  };
+  console.log('setCookieRequest: %j', cookieRequest);
+  return cookieRequest;
+};
 
 const getContextCookie = (headers: CloudFrontHeaders) => {
   const contextCookie = (headers.cookie || []).find((cookie) =>
@@ -70,6 +74,12 @@ const getContextQueryString = (querystring: string) => {
   return result;
 };
 
+const getRandomContext = () => {
+  const result = Math.random() < BLUE_GREEN_RATIO ? 'blue' : 'green';
+  console.log('getRandomContext: %j', result);
+  return result;
+};
+
 /**
  * This function ensures that the x-blue-green-context header is set for the next
  * leg of the CloudFront journey, which is "Origin Request". This leg, known as
@@ -105,11 +115,11 @@ export const handler: CloudFrontRequestHandler = (
   } else if (contextCookie) {
     blueGreenContext = contextCookie;
   } else {
-    blueGreenContext = Math.random() < BLUE_GREEN_RATIO ? 'blue' : 'green';
+    blueGreenContext = getRandomContext();
+  }
 
-    if (uri === '/') {
-      return callback(null, setCookieRequest(uri, blueGreenContext));
-    }
+  if (uri === '/' && blueGreenContext !== contextCookie) {
+    return callback(null, setCookieRequest(uri, blueGreenContext));
   }
 
   headers[blueGreenHeaderContextKey] = [
