@@ -18,6 +18,7 @@ import { ARecord, HostedZone, IHostedZone, RecordTarget } from 'aws-cdk-lib/aws-
 import { CloudFrontTarget } from 'aws-cdk-lib/aws-route53-targets';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
+import { blueGreenHeaderContextKey } from './lambda/blue-green.viewer-request';
 import {
   Environment,
   WebsitePipeline,
@@ -42,8 +43,10 @@ export class WebsiteStack extends Stack {
   public oai: OriginAccessIdentity;
   public blueOrigin: S3Origin;
   public greenOrigin: S3Origin;
-  public edgeOriginRequestFunction: NodejsFunction;
   public edgeViewerRequestFunction: NodejsFunction;
+  public edgeOriginRequestFunction: NodejsFunction;
+  public edgeOriginResponseFunction: NodejsFunction;
+  public edgeViewerResponseFunction: NodejsFunction;
   public distribution: Distribution;
   public pipeline: WebsitePipeline;
 
@@ -163,12 +166,34 @@ export class WebsiteStack extends Stack {
    */
   buildEdgeLambdas() {
     const lambdaId = `${this.id}-blue-green-edge`;
-    this.edgeOriginRequestFunction = new NodejsFunction(this, `${lambdaId}-origin`, {
-      entry: './lib/lambda/blue-green.origin-request.ts',
-    });
-    this.edgeViewerRequestFunction = new NodejsFunction(this, `${lambdaId}-viewer`, {
-      entry: './lib/lambda/blue-green.viewer-request.ts',
-    });
+    this.edgeViewerRequestFunction = new NodejsFunction(
+      this,
+      `${lambdaId}-viewer-request`,
+      {
+        entry: './lib/lambda/blue-green.viewer-request.ts',
+      }
+    );
+    this.edgeOriginRequestFunction = new NodejsFunction(
+      this,
+      `${lambdaId}-origin-request`,
+      {
+        entry: './lib/lambda/blue-green.origin-request.ts',
+      }
+    );
+    this.edgeOriginResponseFunction = new NodejsFunction(
+      this,
+      `${lambdaId}-origin-response`,
+      {
+        entry: './lib/lambda/blue-green.origin-response.ts',
+      }
+    );
+    this.edgeViewerResponseFunction = new NodejsFunction(
+      this,
+      `${lambdaId}-viewer-response`,
+      {
+        entry: './lib/lambda/blue-green.viewer-response.ts',
+      }
+    );
   }
 
   /**
@@ -179,8 +204,8 @@ export class WebsiteStack extends Stack {
     const distributionId = `${this.id}-distribution`;
     const cachePolicy = new CachePolicy(this, `${distributionId}-cache-policy`, {
       comment: `Cache Policy for ${distributionId}`,
-      headerBehavior: CacheHeaderBehavior.allowList('x-blue-green-context'),
-      cookieBehavior: CacheCookieBehavior.all(),
+      headerBehavior: CacheHeaderBehavior.allowList(blueGreenHeaderContextKey),
+      cookieBehavior: CacheCookieBehavior.allowList(blueGreenHeaderContextKey),
       queryStringBehavior: CacheQueryStringBehavior.all(),
     });
     const originRequestPolicy = OriginRequestPolicy.CORS_S3_ORIGIN;
@@ -199,6 +224,14 @@ export class WebsiteStack extends Stack {
           {
             eventType: LambdaEdgeEventType.ORIGIN_REQUEST,
             functionVersion: this.edgeOriginRequestFunction.currentVersion,
+          },
+          {
+            eventType: LambdaEdgeEventType.ORIGIN_RESPONSE,
+            functionVersion: this.edgeOriginResponseFunction.currentVersion,
+          },
+          {
+            eventType: LambdaEdgeEventType.VIEWER_RESPONSE,
+            functionVersion: this.edgeViewerResponseFunction.currentVersion,
           },
         ],
       },

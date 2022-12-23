@@ -1,0 +1,73 @@
+{
+  "Records": [
+    {
+      "cf": {
+        "config": {
+          "distributionDomainName": "d1vnqbn14tuqe8.cloudfront.net",
+          "distributionId": "E2UAP6D3XDV68S",
+          "eventType": "origin-request",
+          "requestId": "OvOfrS9F6YX-Uq-JooYNrhG4n-Wl6v9PpCANkvxHlXofI1xW6iHRoA=="
+        },
+        "request": {
+          "clientIp": "72.200.85.196",
+          "headers": {
+            "cookie": [
+              {
+                "key": "Cookie",
+                "value": "x-blue-green-context=blue"
+              }
+            ],
+            "x-forwarded-for": [
+              {
+                "key": "X-Forwarded-For",
+                "value": "72.200.85.196"
+              }
+            ],
+            "user-agent": [
+              {
+                "key": "User-Agent",
+                "value": "Amazon CloudFront"
+              }
+            ],
+            "via": [
+              {
+                "key": "Via",
+                "value": "1.1 9a78c4f82dfbbdeb05f6c50886d051be.cloudfront.net (CloudFront)"
+              }
+            ],
+            "x-blue-green-context": [
+              {
+                "key": "x-blue-green-context",
+                "value": "blue"
+              }
+            ],
+            "host": [
+              {
+                "key": "Host",
+                "value": "myapp-dev-bucket-blue-us-east-1-190423078218.s3.us-east-1.amazonaws.com"
+              }
+            ],
+            "cache-control": [
+              {
+                "key": "Cache-Control",
+                "value": "max-age=0"
+              }
+            ]
+          },
+          "method": "GET",
+          "origin": {
+            "s3": {
+              "authMethod": "origin-access-identity",
+              "customHeaders": {},
+              "domainName": "myapp-dev-bucket-blue-us-east-1-190423078218.s3.us-east-1.amazonaws.com",
+              "path": "",
+              "region": "us-east-1"
+            }
+          },
+          "querystring": "",
+          "uri": "/index.html"
+        }
+      }
+    }
+  ]
+}

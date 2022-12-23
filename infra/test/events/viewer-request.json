@@ -1,0 +1,64 @@
+{
+  "Records": [
+    {
+      "cf": {
+        "config": {
+          "distributionDomainName": "d1vnqbn14tuqe8.cloudfront.net",
+          "distributionId": "E2UAP6D3XDV68S",
+          "eventType": "viewer-request",
+          "requestId": "fSFdjmhDdcHq_ABOoxn1D8TyWCwG6lU1-skRiJARsdKkmsQQqw3JEA=="
+        },
+        "request": {
+          "clientIp": "72.200.85.196",
+          "headers": {
+            "host": [
+              {
+                "key": "Host",
+                "value": "myapp.dev.damraventures.com"
+              }
+            ],
+            "user-agent": [
+              {
+                "key": "User-Agent",
+                "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"
+              }
+            ],
+            "cookie": [
+              {
+                "key": "Cookie",
+                "value": "x-blue-green-context=blue"
+              }
+            ],
+            "pragma": [
+              {
+                "key": "pragma",
+                "value": "no-cache"
+              }
+            ],
+            "cache-control": [
+              {
+                "key": "cache-control",
+                "value": "no-cache"
+              }
+            ],
+            "accept": [
+              {
+                "key": "accept",
+                "value": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
+              }
+            ],
+            "accept-language": [
+              {
+                "key": "accept-language",
+                "value": "en-US,en;q=0.9,it;q=0.8"
+              }
+            ]
+          },
+          "method": "GET",
+          "querystring": "",
+          "uri": "/"
+        }
+      }
+    }
+  ]
+}

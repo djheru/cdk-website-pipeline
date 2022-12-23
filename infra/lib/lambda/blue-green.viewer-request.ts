@@ -1,5 +1,6 @@
 import {
   Callback,
+  CloudFrontHeaders,
   CloudFrontRequest,
   CloudFrontRequestEvent,
   CloudFrontRequestHandler,
@@ -12,7 +13,7 @@ export const BLUE_GREEN_RATIO = 0.8;
 export const blueGreenHeaderContextKey = 'x-blue-green-context';
 export const blueGreenQueryStringParam = `blue_green`;
 
-const setCookieResponse = (location: string, blueGreenContext: string) => ({
+const setCookieRequest = (location: string, blueGreenContext: string) => ({
   status: '302',
   statusDescription: 'Found',
   headers: {
@@ -30,6 +31,44 @@ const setCookieResponse = (location: string, blueGreenContext: string) => ({
     ],
   },
 });
+
+const getContextCookie = (headers: CloudFrontHeaders) => {
+  const contextCookie = (headers.cookie || []).find((cookie) =>
+    cookie.value.includes(blueGreenHeaderContextKey)
+  );
+  if (!contextCookie) {
+    console.log('No context cookie found');
+    return null;
+  }
+  const result = contextCookie.value.includes(`${blueGreenHeaderContextKey}=blue`)
+    ? 'blue'
+    : 'green';
+  console.log('getContextCookie: %j', result);
+  return result;
+};
+
+const getContextHeader = (headers: CloudFrontHeaders) => {
+  const contextHeader = headers[blueGreenHeaderContextKey];
+  if (!contextHeader) {
+    console.log('No context header found');
+    return null;
+  }
+  const result = contextHeader[0].value === 'blue' ? 'blue' : 'green';
+  console.log('getContextHeader: %j', result);
+  return result;
+};
+
+const getContextQueryString = (querystring: string) => {
+  const querystringParams = qs.parse(`${querystring}`);
+  const contextQueryStringParam = querystringParams[blueGreenQueryStringParam];
+  if (!contextQueryStringParam) {
+    console.log('No context querystring found');
+    return null;
+  }
+  const result = contextQueryStringParam === 'blue' ? 'blue' : 'green';
+  console.log('getContextQueryString: %j', result);
+  return result;
+};
 
 /**
  * This function ensures that the x-blue-green-context header is set for the next
@@ -50,38 +89,27 @@ export const handler: CloudFrontRequestHandler = (
 ) => {
   console.log('event: %j', event);
 
-  const request: CloudFrontRequest = event.Records[0].cf.request;
-  const headers = request.headers;
-  const querystringParams = qs.parse(`${request.querystring}`);
-
   let blueGreenContext: 'blue' | 'green' = 'blue';
-  const contextHeader = headers[blueGreenHeaderContextKey];
-  const contextCookie = (headers.cookie || []).find((cookie) =>
-    cookie.value.includes(blueGreenHeaderContextKey)
-  );
-  const contextQueryStringParam = querystringParams[blueGreenQueryStringParam];
 
-  if (contextHeader) {
-    blueGreenContext = contextHeader[0].value === 'blue' ? 'blue' : 'green';
-    console.log('Existing header: %j', blueGreenContext);
-  } else if (contextQueryStringParam) {
-    blueGreenContext = contextQueryStringParam === 'blue' ? 'blue' : 'green';
-    console.log('Existing query string: %j', blueGreenContext);
-    // Update querystring for origin request
-    delete querystringParams[blueGreenQueryStringParam];
-    request.querystring = qs.stringify(querystringParams);
+  const request: CloudFrontRequest = event.Records[0].cf.request;
+  const { headers, querystring, uri } = request;
+
+  const contextQueryString = getContextQueryString(querystring);
+  const contextHeader = getContextHeader(headers);
+  const contextCookie = getContextCookie(headers);
+
+  if (contextQueryString) {
+    blueGreenContext = contextQueryString;
+  } else if (contextHeader) {
+    blueGreenContext = contextHeader;
   } else if (contextCookie) {
-    blueGreenContext = contextCookie.value.includes(`${blueGreenHeaderContextKey}=blue`)
-      ? 'blue'
-      : 'green';
-    console.log('Existing cookie: %j', blueGreenContext);
+    blueGreenContext = contextCookie;
   } else {
     blueGreenContext = Math.random() < BLUE_GREEN_RATIO ? 'blue' : 'green';
-    console.log('Randomly chosen header: %j', blueGreenContext);
-    // redirect and set cookie
-    const redirectResponse = setCookieResponse(request.uri, blueGreenContext);
-    console.log('Set-cookie redirect: %j', redirectResponse);
-    return callback(null, redirectResponse);
+
+    if (uri === '/') {
+      return callback(null, setCookieRequest(uri, blueGreenContext));
+    }
   }
 
   headers[blueGreenHeaderContextKey] = [
@@ -91,6 +119,6 @@ export const handler: CloudFrontRequestHandler = (
     },
   ];
 
-  console.log('response: %j', request);
+  console.log('returned request: %j', request);
   return callback(null, { ...request, headers: { ...request.headers, ...headers } });
 };

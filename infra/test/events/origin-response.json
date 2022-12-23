@@ -1,0 +1,157 @@
+{
+  "Records": [
+    {
+      "cf": {
+        "config": {
+          "distributionDomainName": "d1vnqbn14tuqe8.cloudfront.net",
+          "distributionId": "E2UAP6D3XDV68S",
+          "eventType": "origin-response",
+          "requestId": "eEVPHxOxQx0TMV-XnE0lUqdzNBU_VJqniOMW5ZspNmpGflgTi9ploQ=="
+        },
+        "request": {
+          "clientIp": "72.200.85.196",
+          "headers": {
+            "cookie": [
+              {
+                "key": "Cookie",
+                "value": "x-blue-green-context=blue"
+              }
+            ],
+            "x-forwarded-for": [
+              {
+                "key": "X-Forwarded-For",
+                "value": "72.200.85.196"
+              }
+            ],
+            "user-agent": [
+              {
+                "key": "User-Agent",
+                "value": "Amazon CloudFront"
+              }
+            ],
+            "via": [
+              {
+                "key": "Via",
+                "value": "1.1 2c3df4ffd341b43842c2c7d863d55a54.cloudfront.net (CloudFront)"
+              }
+            ],
+            "pragma": [
+              {
+                "key": "Pragma",
+                "value": "no-cache"
+              }
+            ],
+            "x-blue-green-context": [
+              {
+                "key": "x-blue-green-context",
+                "value": "green"
+              }
+            ],
+            "host": [
+              {
+                "key": "Host",
+                "value": "myapp-dev-bucket-green-us-east-1-190423078218.s3.us-east-1.amazonaws.com"
+              }
+            ],
+            "cache-control": [
+              {
+                "key": "Cache-Control",
+                "value": "no-cache"
+              }
+            ]
+          },
+          "method": "GET",
+          "origin": {
+            "s3": {
+              "authMethod": "origin-access-identity",
+              "customHeaders": {},
+              "domainName": "myapp-dev-bucket-green-us-east-1-190423078218.s3.us-east-1.amazonaws.com",
+              "path": "",
+              "region": "us-east-1"
+            }
+          },
+          "querystring": "",
+          "uri": "/index.html"
+        },
+        "response": {
+          "headers": {
+            "x-amz-id-2": [
+              {
+                "key": "x-amz-id-2",
+                "value": "KZfmu3bwFCoHYABXSr+TOL9YixKY+y+vCkwrGzmCZ5HS+j5hqJMKg7m2rtXgAOFYMSChaEdzOz4wskxgYLWebA=="
+              }
+            ],
+            "x-amz-request-id": [
+              {
+                "key": "x-amz-request-id",
+                "value": "SW2DK0GPABPSC6BS"
+              }
+            ],
+            "date": [
+              {
+                "key": "Date",
+                "value": "Fri, 23 Dec 2022 00:16:05 GMT"
+              }
+            ],
+            "last-modified": [
+              {
+                "key": "Last-Modified",
+                "value": "Thu, 22 Dec 2022 19:50:03 GMT"
+              }
+            ],
+            "etag": [
+              {
+                "key": "ETag",
+                "value": "\"dc684a833273af601ac17adfdb1e207b\""
+              }
+            ],
+            "x-amz-meta-codebuild-content-sha256": [
+              {
+                "key": "x-amz-meta-codebuild-content-sha256",
+                "value": "110a016884e72f1c7f9ddf052fe9e565fd65555408930d99b341664ce90afada"
+              }
+            ],
+            "x-amz-meta-codebuild-buildarn": [
+              {
+                "key": "x-amz-meta-codebuild-buildarn",
+                "value": "arn:aws:codebuild:us-east-1:190423078218:build/myapp-dev-cicd-build-project:0c03472a-efb2-402a-8a04-2440a1a110b6"
+              }
+            ],
+            "x-amz-meta-codebuild-content-md5": [
+              {
+                "key": "x-amz-meta-codebuild-content-md5",
+                "value": "78b8d3ac8b9e1fce629e098b670382cd"
+              }
+            ],
+            "accept-ranges": [
+              {
+                "key": "Accept-Ranges",
+                "value": "bytes"
+              }
+            ],
+            "server": [
+              {
+                "key": "Server",
+                "value": "AmazonS3"
+              }
+            ],
+            "content-type": [
+              {
+                "key": "Content-Type",
+                "value": "text/html"
+              }
+            ],
+            "content-length": [
+              {
+                "key": "Content-Length",
+                "value": "650"
+              }
+            ]
+          },
+          "status": "200",
+          "statusDescription": "OK"
+        }
+      }
+    }
+  ]
+}
