@@ -278,13 +278,9 @@ PR Review URL: https://github.com/${githubOwner}/${githubRepo}/tree/${githubBran
     const slackNotificationId = `${this.id}-slack-notification`;
     this.slackNotificationRule = new NotificationRule(this, slackNotificationId, {
       events: [
-        'codepipeline-pipeline-action-execution-failed',
-        'codepipeline-pipeline-manual-approval-failed',
         'codepipeline-pipeline-manual-approval-needed',
-        'codepipeline-pipeline-manual-approval-succeeded',
         'codepipeline-pipeline-pipeline-execution-failed',
         'codepipeline-pipeline-pipeline-execution-succeeded',
-        'codepipeline-pipeline-stage-execution-failed',
       ],
       source: this.pipeline,
       targets: [this.slackChannelConfiguration],
