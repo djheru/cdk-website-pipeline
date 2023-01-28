@@ -18,7 +18,7 @@ import { ARecord, HostedZone, IHostedZone, RecordTarget } from 'aws-cdk-lib/aws-
 import { CloudFrontTarget } from 'aws-cdk-lib/aws-route53-targets';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
-import { blueGreenHeaderContextKey } from './lambda/blue-green.viewer-request';
+import { blueGreenHeaderContextKey } from '../src/handlers/viewer-request';
 import {
   Environment,
   WebsitePipeline,
@@ -170,28 +170,28 @@ export class WebsiteStack extends Stack {
       this,
       `${lambdaId}-viewer-request`,
       {
-        entry: './lib/lambda/blue-green.viewer-request.ts',
+        entry: './src/handlers/viewer-request.ts',
       }
     );
     this.edgeOriginRequestFunction = new NodejsFunction(
       this,
       `${lambdaId}-origin-request`,
       {
-        entry: './lib/lambda/blue-green.origin-request.ts',
+        entry: './src/handlers/origin-request.ts',
       }
     );
     this.edgeOriginResponseFunction = new NodejsFunction(
       this,
       `${lambdaId}-origin-response`,
       {
-        entry: './lib/lambda/blue-green.origin-response.ts',
+        entry: './src/handlers/origin-response.ts',
       }
     );
     this.edgeViewerResponseFunction = new NodejsFunction(
       this,
       `${lambdaId}-viewer-response`,
       {
-        entry: './lib/lambda/blue-green.viewer-response.ts',
+        entry: './src/handlers/viewer-response.ts',
       }
     );
   }
@@ -281,6 +281,7 @@ export class WebsiteStack extends Stack {
       blueBucket: this.blueBucket,
       greenBucket: this.greenBucket,
       distributionId: this.distribution.distributionId,
+      fullDomainName: this.fullDomainName,
       ...this.props.pipelineProps,
     });
   }

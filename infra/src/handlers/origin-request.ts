@@ -6,7 +6,7 @@ import {
   CloudFrontRequestResult,
   Context,
 } from 'aws-lambda';
-import { blueGreenHeaderContextKey } from './blue-green.viewer-request';
+import { blueGreenHeaderContextKey } from './viewer-request';
 
 /**
  * This function looks for the Blue/Green header and uses it to route the request to

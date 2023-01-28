@@ -65,6 +65,7 @@ const stackId = `${serviceName}-${environmentName}`;
 
 const pipelineProps: WebsitePipelineBaseProps = {
   codestarConnectionArn,
+  environmentName,
   githubBranchName,
   githubOwner,
   githubRepo,

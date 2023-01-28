@@ -24,6 +24,8 @@ export type Environment = 'dev' | 'prod' | 'test' | string;
 export interface WebsitePipelineBaseProps {
   // Authenticates with GitHub to receive notifications of git activity
   codestarConnectionArn: string;
+  // E.g. dev, prod, etc
+  environmentName: string;
   // When this branch is updated, its code will be deployed
   githubBranchName: string;
   // GitHub user name
@@ -43,6 +45,8 @@ export interface WebsitePipelineProps extends WebsitePipelineBaseProps {
   greenBucket: Bucket;
   // CloudFront distribution serving these files
   distributionId: string;
+  // Full domain name
+  fullDomainName: string;
 }
 
 export class WebsitePipeline extends Construct {
@@ -170,8 +174,9 @@ export class WebsitePipeline extends Construct {
 Approve the Deployment to S3 for the GREEN deployment group? 
       
 Add request header "x-blue-green-context" with value of "green", or a query string of "?blue_green=green" to test the new deployment.
+PR Review URL: https://github.com/${githubOwner}/${githubRepo}/tree/${githubBranchName}
 `,
-      externalEntityLink: `https://github.com/${githubOwner}/${githubRepo}/tree/${githubBranchName}`,
+      externalEntityLink: `https://${this.props.fullDomainName}`,
       runOrder: 3,
     });
 
