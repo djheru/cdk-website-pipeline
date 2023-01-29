@@ -68,26 +68,35 @@ When the build is completed successfully, the bundled files are collected into a
 
 ### Stage 3: Deploy Green
 
+Green represents the new source code deployment. The metaphor is new green grass growing
+
 This stage deploys the green side of the S3 origin. It takes the output artifact and copies the files to the green bucket. It then invalidates the CloudFront cache for the green bucket so that the new files can be served to users who are targeted as "green". Finally, it pauses pipeline execution until a manual approval process is complete.
 
 ### Stage 4: Deploy Blue
+Blue represents the existing source code deployment. The metaphor is frozen/ice
 
 Once the acceptance testing on the green version is successful, an engineer can click the "Review" button on the CodePipeline console, and then click "Approve". This will trigger a deployment to the green bucket. Once the new files are written to the bucket, the cache is again invalidated, and the new files are served to all users.
 
 ## Testing / Selecting Blue or Green
 
-By default, web requests are randomly assigned to the green or blue S3 origin bucket. The assignment logic is that a request has an 80% chance of being directed to the blue bucket.
+By default, web requests are randomly assigned to the green or blue S3 origin bucket. The assignment logic is that a request has an 80% chance of being directed to the blue bucket. The contents of the blue and green S3 buckets will be identical, unless a deployment is in process. In that case, the new versions of the files will be stored in the green bucket until the have received a manual approval.
 
-HOWEVER, it is possible to manually select blue or green by passing a header in the HTTP request. This can be accomplished with tools like the ModHeader Chrome browser extension.
+It is possible to manually select the blue or green bucket. This can be done in two ways:
 
-The header used to route traffic manually to green or blue is `x-blue-green-context`. If this header is added to the request with a value of "`green`" or "`blue`", the request will be routed to the corresponding bucket.
+- By passing a header in the HTTP request
+  - This can be accomplished with tools like the ModHeader Chrome browser extension.
+  - Pass the header `x-blue-green-context` with a value of`blue` or `green`
+- By adding a the querystring `blue_green` to the url with a value of `blue` or `green`
+  - e.g. `?blue_green=green`
+  - When you add the querystring param it will redirect, and the query string will disappear
+  - IMPORTANT - Reload once more to view the new version
 
 ### Testing Workflow
 
 1. A deployment is triggered by a push to GitHub
 2. When the deployment to the green bucket is complete, the pipeline pauses, waiting for manual approval
-3. The tester would then use the ModHeader Chrome browser extension to add the header `x-blue-green-context` with a value of "`green`"
-4. Now the tester will see the new version of the site when they visit the URL (may need to clear local cache)
+3. The tester would then use the ModHeader Chrome browser extension to add the header `x-blue-green-context` with a value of "`green`", or uses the querystring `?blue_green=green`
+4. Now the tester will see the new version of the site when they visit the URL (may need to refresh)
 5. If problems are found, the steps 1-4 can be repeated
 6. Once approved, the tester clicks the "Review" button in the CodePipeline console, and the new files are deployed to the green bucket, and displayed to all users
 
