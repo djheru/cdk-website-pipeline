@@ -25,55 +25,51 @@ const setContextHeader = (
   [blueGreenHeaderContextKey]: [{ key, value: `${value}` }],
 });
 
-const setCookieRequest = (location: string, blueGreenContext: BlueGreenContext) => {
-  const cookieRequest = {
-    status: '302',
-    statusDescription: 'Found',
-    headers: setContextHeader(
-      {
-        location: [
-          {
-            key: 'location',
-            value: location,
-          },
-        ],
-        'set-cookie': [
-          {
-            key: 'set-cookie',
-            value: `${blueGreenHeaderContextKey}=${blueGreenContext}; Secure; HttpOnly`,
-          },
-        ],
-      },
-      blueGreenContext
-    ),
-  };
-  console.log('setCookieRequest: %j', cookieRequest);
-  return cookieRequest;
-};
+const setCookieRequest = (location: string, blueGreenContext: BlueGreenContext) => ({
+  status: '302',
+  statusDescription: 'Found',
+  headers: setContextHeader(
+    {
+      location: [
+        {
+          key: 'location',
+          value: location,
+        },
+      ],
+      'set-cookie': [
+        {
+          key: 'set-cookie',
+          value: `${blueGreenHeaderContextKey}=${blueGreenContext}_${Date.now()}; Secure; HttpOnly`,
+        },
+      ],
+    },
+    blueGreenContext
+  ),
+});
 
 const getContextCookie = (headers: CloudFrontHeaders): RequestBlueGreenContext => {
   const contextCookie = (headers.cookie || []).find((cookie) =>
     cookie.value.includes(blueGreenHeaderContextKey)
   );
   if (!contextCookie) {
-    console.log('No context cookie found');
+    console.log('No contextCookie found');
     return null;
   }
   const result = contextCookie.value.includes(`${blueGreenHeaderContextKey}=blue`)
     ? 'blue'
     : 'green';
-  console.log('getContextCookie: %j', result);
+  console.log('contextCookie: %j', result);
   return result;
 };
 
 const getContextHeader = (headers: CloudFrontHeaders): RequestBlueGreenContext => {
   const contextHeader = headers[blueGreenHeaderContextKey];
   if (!contextHeader) {
-    console.log('No context header found');
+    console.log('No contextHeader found');
     return null;
   }
   const result = contextHeader[0].value === 'blue' ? 'blue' : 'green';
-  console.log('getContextHeader: %j', result);
+  console.log('contextHeader: %j', result);
   return result;
 };
 
@@ -81,17 +77,17 @@ const getContextQueryString = (querystring: string): RequestBlueGreenContext => 
   const querystringParams = qs.parse(`${querystring}`);
   const contextQueryStringParam = querystringParams[blueGreenQueryStringParam];
   if (!contextQueryStringParam) {
-    console.log('No context querystring found');
+    console.log('No contextQuerystring found');
     return null;
   }
   const result = contextQueryStringParam === 'blue' ? 'blue' : 'green';
-  console.log('getContextQueryString: %j', result);
+  console.log('contextQueryString: %j', result);
   return result;
 };
 
 const getRandomContext = (): BlueGreenContext => {
   const result = Math.random() < BLUE_GREEN_RATIO ? 'blue' : 'green';
-  console.log('getRandomContext: %j', result);
+  console.log('randomContext: %j', result);
   return result;
 };
 
@@ -102,7 +98,7 @@ const getRandomContext = (): BlueGreenContext => {
  * caching. We are adding this header to the cache, so that the blue files will
  * be cached for "blue" group and likewise for "green".
  *
- * If the header already exists (from the original response), it is respected,
+ * If a cookie, header, or query string is set, it is used in the origin request,
  * otherwise blue or green is assigned using the ratio of BLUE_GREEN_RATIO blue
  * to green. Once the request is assigned blue or green, the header is written
  * (if it doesn't already exist)
@@ -120,26 +116,24 @@ export const handler: CloudFrontRequestHandler = (
   const request: CloudFrontRequest = event.Records[0].cf.request;
   const { headers: requestHeaders, querystring, uri } = request;
 
-  headers = { ...requestHeaders };
-
   const contextQueryString = getContextQueryString(querystring);
-  const contextHeader = getContextHeader(headers);
-  const contextCookie = getContextCookie(headers);
-  const randomContext = getRandomContext();
+  const contextHeaders = getContextHeader(requestHeaders);
+  const contextCookie = getContextCookie(requestHeaders);
 
-  const requestContext = [contextQueryString, contextHeader, contextCookie].find(
+  const requestContext = [contextQueryString, contextHeaders, contextCookie].find(
     (ctx: string | null) => ctx !== null
   ) as RequestBlueGreenContext;
 
-  blueGreenContext = requestContext || randomContext;
+  blueGreenContext = requestContext || getRandomContext();
+  console.log(`blueGreenContext: ${blueGreenContext}`);
 
-  setContextHeader(headers, blueGreenContext);
+  headers = setContextHeader(requestHeaders, blueGreenContext);
 
   if (uri === '/' && blueGreenContext !== contextCookie) {
     return callback(null, setCookieRequest(uri, blueGreenContext));
   }
 
-  const result = { ...request, headers: { ...request.headers, ...headers } };
+  const result = { ...request, headers };
   console.log('returned request: %j', result);
   return callback(null, result);
 };

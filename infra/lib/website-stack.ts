@@ -204,8 +204,10 @@ export class WebsiteStack extends Stack {
     const distributionId = `${this.id}-distribution`;
     const cachePolicy = new CachePolicy(this, `${distributionId}-cache-policy`, {
       comment: `Cache Policy for ${distributionId}`,
-      headerBehavior: CacheHeaderBehavior.allowList(blueGreenHeaderContextKey),
+      enableAcceptEncodingBrotli: true,
+      enableAcceptEncodingGzip: true,
       cookieBehavior: CacheCookieBehavior.allowList(blueGreenHeaderContextKey),
+      headerBehavior: CacheHeaderBehavior.allowList(blueGreenHeaderContextKey),
       queryStringBehavior: CacheQueryStringBehavior.all(),
     });
     const originRequestPolicy = OriginRequestPolicy.CORS_S3_ORIGIN;
